@@ -4,7 +4,7 @@ const errorResponse = (res, message, error = "", statusCode = 400) => {
     errorLogger(error)
   }
   console.error("Error :", error);
-  return res.status(200).json({ status: statusCode, message: message });
+  return res.status(statusCode==401?401:200).json({ status: statusCode, message: message });
 };
 
 const successResponse = (res, data, message = "Success", statusCode = 200) => {

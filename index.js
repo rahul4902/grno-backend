@@ -40,6 +40,7 @@ mongoose
 // Import routes
 const authRoutes = require("./routes/auth");
 const testRoutes = require("./routes/test");
+const memberRoutes = require("./routes/member");
 const categoryRoutes = require("./routes/category");
 const qnaRoutes = require("./routes/qna");
 const sampleTypeRoutes = require("./routes/sampleType");
@@ -48,6 +49,8 @@ const { successResponse, errorResponse } = require("./helpers/responseHelper");
 
 // Use routes
 app.use("/api/auth", authRoutes);
+app.use("/api/member", memberRoutes);
+// admin
 app.use("/test", testRoutes);
 app.use("/category", categoryRoutes);
 app.use("/qna", qnaRoutes);
