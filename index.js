@@ -41,7 +41,10 @@ mongoose
 const authRoutes = require("./routes/auth");
 const testRoutes = require("./routes/test");
 const memberRoutes = require("./routes/member");
+const userRoutes = require("./routes/user");
+const addressRoutes = require("./routes/address");
 const categoryRoutes = require("./routes/category");
+const couponRoutes = require("./routes/coupon");
 const qnaRoutes = require("./routes/qna");
 const sampleTypeRoutes = require("./routes/sampleType");
 const testCriteriaRoutes = require("./routes/testCriteria");
@@ -50,9 +53,12 @@ const { successResponse, errorResponse } = require("./helpers/responseHelper");
 // Use routes
 app.use("/api/auth", authRoutes);
 app.use("/api/member", memberRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/address", addressRoutes);
 // admin
 app.use("/test", testRoutes);
 app.use("/category", categoryRoutes);
+app.use("/api/coupon", couponRoutes);
 app.use("/qna", qnaRoutes);
 app.use("/sampleType", sampleTypeRoutes);
 app.use("/testCriteria", testCriteriaRoutes);
