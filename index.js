@@ -44,6 +44,7 @@ const memberRoutes = require("./routes/member");
 const userRoutes = require("./routes/user");
 const addressRoutes = require("./routes/address");
 const categoryRoutes = require("./routes/category");
+const bannerRoutes = require("./routes/banner");
 const couponRoutes = require("./routes/coupon");
 const qnaRoutes = require("./routes/qna");
 const sampleTypeRoutes = require("./routes/sampleType");
@@ -58,6 +59,7 @@ app.use("/api/address", addressRoutes);
 // admin
 app.use("/test", testRoutes);
 app.use("/category", categoryRoutes);
+app.use("/api/banner", bannerRoutes);
 app.use("/api/coupon", couponRoutes);
 app.use("/qna", qnaRoutes);
 app.use("/sampleType", sampleTypeRoutes);
