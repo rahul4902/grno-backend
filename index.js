@@ -48,6 +48,7 @@ const couponRoutes = require("./routes/coupon");
 const qnaRoutes = require("./routes/qna");
 const sampleTypeRoutes = require("./routes/sampleType");
 const testCriteriaRoutes = require("./routes/testCriteria");
+const orderRoutes = require("./routes/order");
 const { successResponse, errorResponse } = require("./helpers/responseHelper");
 
 // Use routes
@@ -55,6 +56,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/member", memberRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/address", addressRoutes);
+app.use("/api/orders", orderRoutes);
 // admin
 app.use("/test", testRoutes);
 app.use("/category", categoryRoutes);
