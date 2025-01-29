@@ -5,7 +5,7 @@
 // module.exports.fileUrl = "http://localhost:5000/uploads/";
 
 module.exports.FRONT_BASE_URL = "";
-module.exports.baseFileUrl = "http://localhost:5000/uploads/";
+module.exports.baseFileUrl = "https://grno-backend.onrender.com/uploads/";
 // module.exports.fileUrl = "https://campaigns.cybermatrixsolutions.com/promotionbackend/uploads/";
 module.exports.APP_NAME = "Greno";
 
