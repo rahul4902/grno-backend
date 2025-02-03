@@ -49,17 +49,19 @@ const couponRoutes = require("./routes/coupon");
 const qnaRoutes = require("./routes/qna");
 const sampleTypeRoutes = require("./routes/sampleType");
 const testCriteriaRoutes = require("./routes/testCriteria");
+const contactRoutes = require("./routes/contact");
 const orderRoutes = require("./routes/order");
 const { successResponse, errorResponse } = require("./helpers/responseHelper");
 
 // Use routes
+app.use("/api/contact",contactRoutes );
 app.use("/api/auth", authRoutes);
 app.use("/api/member", memberRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/address", addressRoutes);
 app.use("/api/orders", orderRoutes);
 // admin
-app.use("/test", testRoutes);
+app.use("/api/test", testRoutes);
 app.use("/category", categoryRoutes);
 app.use("/api/banner", bannerRoutes);
 app.use("/api/coupon", couponRoutes);

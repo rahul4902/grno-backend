@@ -5,7 +5,7 @@ const {
   paginationResponse,
 } = require("../helpers/responseHelper");
 const path = require("path");
-const fs= require("fs");
+const fs = require("fs");
 const Category = require("../models/Category");
 const Test = require("../models/Test");
 const { baseFileUrl } = require("../utils/constant");
@@ -20,10 +20,17 @@ exports.list = async (req, res) => {
     const skip = (page - 1) * limit;
     // Fetch paginated results and total count
     const [results, total] = await Promise.all([
-      Category.find({}).skip(skip).limit(limit).sort({createdAt:-1}),
+      Category.find({}).skip(skip).limit(limit).sort({ createdAt: -1 }),
       Category.countDocuments({}),
     ]);
-    return paginationResponse(res,results,"Fetch data successfully.",page,limit,total);
+    return paginationResponse(
+      res,
+      results,
+      "Fetch data successfully.",
+      page,
+      limit,
+      total
+    );
   } catch (err) {
     console.error("Error occurred while searching:", err);
     return errorResponse(res, "An error occurred while fetching category.");
@@ -32,11 +39,15 @@ exports.list = async (req, res) => {
 
 exports.activeList = async (req, res) => {
   try {
-    let results = await Category.find({}).select({ name: 1 });
-    results = results.map((item) => ({
-      value: item._id,
-      label: item.name,
-    }));
+    const { allActive = false } = req.query;
+    let results = await Category.find({}).select({ name: 1,icon:1,icon_url:1,status:1 });
+    if (!allActive) {
+      results = results.map((item) => ({
+        value: item._id,
+        label: item.name,
+      }));
+    }
+
     return successResponse(res, results, "Fetch data successfully.");
   } catch (err) {
     console.error("Error occurred while searching:", err);
@@ -44,9 +55,9 @@ exports.activeList = async (req, res) => {
   }
 };
 
-
 exports.deleteItem = async (req, res) => {
   const { id } = req.params;
+  console.log("id", id);
   try {
     const testExists = await Test.findOne({ category: id });
     if (testExists) {
@@ -55,12 +66,12 @@ exports.deleteItem = async (req, res) => {
 
     const category = await Category.findById(id);
     const icon = category.icon;
-    
-    const deletedDoc = await Category.softDeleteById(id);
+
+    const deletedDoc = await Category.findByIdAndDelete(id);
     if (!deletedDoc) {
       return errorResponse(res, "Category not found");
     }
-    if(icon){
+    if (icon) {
       // if(fs.existsSync(`./uploads/category/${icon}`)){
       //   fs.unlink(`./uploads/category/${icon}`, (err) => {
       //     if (err) {
@@ -75,10 +86,9 @@ exports.deleteItem = async (req, res) => {
   }
 };
 
-
 exports.categoryUpsert = async (req, res) => {
   try {
-    const { _id=null,name, status, order} = req.body;
+    const { _id = null, name, status, order } = req.body;
     let file = null;
     if (req.files) {
       file = req.files["icon"];
@@ -87,25 +97,37 @@ exports.categoryUpsert = async (req, res) => {
 
     let fileName = "";
     let fileUrl = "";
-    if(file){
+    if (file) {
       const extension = path.extname(file.name);
-      fileName = `${Date.now()}${extension}`;    
+      fileName = `${Date.now()}${extension}`;
       const categoryPath = path.join(__dirname, `../uploads/category/`);
-      const categoryImageResponse = await compressImage(file,100,750,categoryPath,fileName);
-      if (categoryImageResponse.status == 400){
+      const categoryImageResponse = await compressImage(
+        file,
+        100,
+        750,
+        categoryPath,
+        fileName
+      );
+      if (categoryImageResponse.status == 400) {
         return errorResponse(res, categoryImageResponse.message);
       }
       fileUrl = `${baseFileUrl}category/${fileName}`;
     }
-    
-    const rowData = {name,status,icon: fileName,icon_url: fileUrl,order};    
+
+    const rowData = { name, status, icon: fileName, icon_url: fileUrl, order };
     if (_id) {
-      savedCategory = await Category.findByIdAndUpdate(_id, rowData, { new: true });
+      savedCategory = await Category.findByIdAndUpdate(_id, rowData, {
+        new: true,
+      });
     } else {
       const category = new Category(rowData);
       savedCategory = await category.save();
     }
-    return successResponse(res, savedCategory, `Category ${_id?'updated':'created'} successfully`);
+    return successResponse(
+      res,
+      savedCategory,
+      `Category ${_id ? "updated" : "created"} successfully`
+    );
   } catch (error) {
     // logErrorToFile(error);
     return errorResponse(res, "Error creating category", error);
