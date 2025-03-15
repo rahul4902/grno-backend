@@ -71,33 +71,41 @@ app.use("/testCriteria", testCriteriaRoutes);
 
 app.get("/search", async (req, res) => {
   const query = req.query.query;
-  const type = req.query.type;
-  const limit = parseInt(req.query.limit) || 2;  // Default to 4 if not specified
-  const page = parseInt(req.query.page) || 2;    // Default to 1 if not specified
+  const type = req.query.type || "test";
+  const limit = parseInt(req.query.limit) || 10;  // Default to 10 records per page
+  const page = parseInt(req.query.page) || 1;     // Default to page 1
 
+  // Ensure query is provided
+  if (!query) {
+    return errorResponse(res, "Query parameter is required.");
+  }
+
+  // Construct the search condition dynamically
   let where = {
-    name: { $regex: new RegExp(query, "i") },
+    $or: [
+      { name: { $regex: new RegExp(query, "i") } } // Use dynamic query
+    ]
   };
 
   if (type) {
     where.package_or_test = type;
   }
 
-  if (!query) {
-    return errorResponse(res, "Query parameter is required.");
-  }
-
   try {
-    // Apply pagination with limit and skip
-    const results = await Test.find(where)
-      .limit(limit)
-      .skip((page - 1) * limit);
+    // Debugging: Log the final query to check correctness
+    console.log("Search filter:", JSON.stringify(where, null, 2));
 
-    // Check if there are more results
-    const totalCount = await Test.countDocuments(where);
+    // Fetch results and total count in parallel
+    const [results, totalCount] = await Promise.all([
+      Test.find(where)
+        .limit(limit)
+        .skip((page - 1) * limit),
+      Test.countDocuments(where)
+    ]);
+
     const hasMore = page * limit < totalCount;
 
-    return successResponse(res, { data: results, hasMore }, "Fetch data successfully.");
+    return successResponse(res, { data: results, hasMore }, "Fetched data successfully.");
   } catch (err) {
     console.error("Error occurred while searching:", err);
     return errorResponse(res, "An error occurred while searching.");
