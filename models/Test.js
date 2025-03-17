@@ -25,11 +25,11 @@ const TestSchema = new Schema({
   },
   lab_cost: {
     type: Number,
-    required: true,
+    required: false,
   },
   offer_price: {
     type: Number,
-    required: true,
+    required: false,
   },
   min_age: {
     type: Number,

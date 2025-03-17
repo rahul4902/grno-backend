@@ -17,7 +17,7 @@ const MONGO_URI =
   "mongodb+srv://rahul123:rahul123@cluster0.mxwls6m.mongodb.net/greno?retryWrites=true&w=majority&appName=Cluster0";
 
 // Middleware
-app.use(cors(['*','192.168.1.6']));
+app.use(cors(["*", "192.168.1.6"]));
 app.use(
   fileUpload({
     limits: {
@@ -30,7 +30,7 @@ app.use(
 app.use(bodyParser.json());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use('/uploads', express.static(path.join(__dirname, '/uploads')));
+app.use("/uploads", express.static(path.join(__dirname, "/uploads")));
 // Connect to MongoDB
 mongoose
   .connect(MONGO_URI, {})
@@ -52,9 +52,10 @@ const testCriteriaRoutes = require("./routes/testCriteria");
 const contactRoutes = require("./routes/contact");
 const orderRoutes = require("./routes/order");
 const { successResponse, errorResponse } = require("./helpers/responseHelper");
+const Category = require("./models/Category");
 
 // Use routes
-app.use("/api/contact",contactRoutes );
+app.use("/api/contact", contactRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/member", memberRoutes);
 app.use("/api/users", userRoutes);
@@ -70,22 +71,33 @@ app.use("/sampleType", sampleTypeRoutes);
 app.use("/testCriteria", testCriteriaRoutes);
 
 app.get("/search", async (req, res) => {
-  const query = req.query.query;
+  const query = req.query.query || null;
+  const category = req.query.category || null;
   const type = req.query.type || "test";
-  const limit = parseInt(req.query.limit) || 10;  // Default to 10 records per page
-  const page = parseInt(req.query.page) || 1;     // Default to page 1
+  const limit = parseInt(req.query.limit) || 10; // Default to 10 records per page
+  const page = parseInt(req.query.page) || 1; // Default to page 1
 
   // Ensure query is provided
-  if (!query) {
+  if (!query && !category) {
     return errorResponse(res, "Query parameter is required.");
   }
 
   // Construct the search condition dynamically
-  let where = {
-    $or: [
-      { name: { $regex: new RegExp(query, "i") } } // Use dynamic query
-    ]
-  };
+  let where = {};
+  if (!category) {
+    where = {
+      $or: [{ name: { $regex: new RegExp(query, "i") } }],
+    };
+  }
+
+  if (category) {
+    const categoryObj = await Category.findOne({ name: category }).select("_id");
+    if (categoryObj) {
+      where.category = categoryObj._id; // Use ObjectId in search
+    } else {
+      return res.status(404).json({ message: "Category not found" });
+    }
+  }
 
   if (type) {
     where.package_or_test = type;
@@ -100,12 +112,16 @@ app.get("/search", async (req, res) => {
       Test.find(where)
         .limit(limit)
         .skip((page - 1) * limit),
-      Test.countDocuments(where)
+      Test.countDocuments(where),
     ]);
 
     const hasMore = page * limit < totalCount;
 
-    return successResponse(res, { data: results, hasMore }, "Fetched data successfully.");
+    return successResponse(
+      res,
+      { data: results, hasMore },
+      "Fetched data successfully."
+    );
   } catch (err) {
     console.error("Error occurred while searching:", err);
     return errorResponse(res, "An error occurred while searching.");
